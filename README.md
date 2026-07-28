@@ -1,5 +1,5 @@
 # 基于 Agent 的胎儿医学影像工具链
-AutoRecon 用于胎儿脑 MRI 的脑提取、三维重建、图像配准、组织分割、脑区分区、表面生成，以及基于证据的质量检查和研究报告生成。
+本胎儿Agent 用于胎儿脑 MRI 的脑提取、三维重建、图像配准、组织分割、脑区分区、表面生成，以及基于证据的质量检查和研究报告生成。
 
 推荐通过 Agentic Dashboard 使用：用户直接输入自然语言需求，系统先整理需求并生成执行计划，用户确认后再运行工具。每一步都会显示进度、简短日志、可视化结果和技术质量指标。
 
@@ -354,7 +354,7 @@ Pipeline 工作目录还包含：
 python -m unittest discover -s tests -v
 ```
 
-验证 Demo、Evidence Bank、截图和组会材料：
+验证 Demo、Evidence Bank：
 
 ```bash
 python scripts/verify_goal_deliverables.py
