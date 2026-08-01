@@ -11,11 +11,6 @@
 
 项目根目录的 `.env` 只保存非敏感配置。可以从示例开始：
 
-```bash
-cd /mnt/sda/huangwei/projects/AutoRecon
-cp .env.example .env
-```
-
 当前推荐配置格式：
 
 ```dotenv
@@ -30,8 +25,8 @@ AUTORECON_LLM_USE_FOR_RESULT_ANALYSIS=true
 AUTORECON_LLM_USE_FOR_REPORTING=true
 AUTORECON_LLM_FALLBACK_TO_RULES=true
 
-AUTORECON_ANTS_DIR=/home/huangwei/.conda/envs/ants/bin
-AUTORECON_ROI_WARP_ENV=/home/zhaojunyang/.conda/envs/zjy
+AUTORECON_ANTS_DIR=...
+AUTORECON_ROI_WARP_ENV=...
 ```
 
 `auto` 会先尝试 OpenAI-compatible 接口；遇到协议级 `404/405` 后自动尝试 Anthropic native 接口，并记住成功的协议。
