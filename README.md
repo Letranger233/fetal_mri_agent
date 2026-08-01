@@ -1,5 +1,6 @@
 # 基于 Agent 的胎儿医学影像工具链
-本胎儿Agent 用于胎儿脑 MRI 的脑提取、三维重建、图像配准、组织分割、脑区分区、表面生成，以及基于证据的质量检查和研究报告生成。
+
+本胎儿 Agent 用于胎儿脑 MRI 的脑提取、三维重建、图像配准、组织分割、脑区分区、表面生成，以及基于证据的质量检查和研究报告生成。
 
 推荐通过 Agentic Dashboard 使用：用户直接输入自然语言需求，系统先整理需求并生成执行计划，用户确认后再运行工具。每一步都会显示进度、简短日志、可视化结果和技术质量指标。
 
@@ -16,8 +17,8 @@
 ```dotenv
 AUTORECON_LLM_ENABLED=true
 AUTORECON_LLM_PROVIDER=auto
-AUTORECON_LLM_BASE_URL=https://airouter.aibotplatform.com/v1
-AUTORECON_LLM_MODEL=anthropic/claude-sonnet-4-6
+AUTORECON_LLM_BASE_URL=https://<llm-api-endpoint>/v1
+AUTORECON_LLM_MODEL=<llm-model-name>
 
 AUTORECON_LLM_USE_FOR_REQUEST_PARSING=true
 AUTORECON_LLM_USE_FOR_PLANNING=true
@@ -25,42 +26,39 @@ AUTORECON_LLM_USE_FOR_RESULT_ANALYSIS=true
 AUTORECON_LLM_USE_FOR_REPORTING=true
 AUTORECON_LLM_FALLBACK_TO_RULES=true
 
-AUTORECON_ANTS_DIR=...
-AUTORECON_ROI_WARP_ENV=...
+AUTORECON_ANTS_DIR=<path-to-ants>
+AUTORECON_ROI_WARP_ENV=<path-to-roi-warp-env>
 ```
 
-`auto` 会先尝试 OpenAI-compatible 接口；遇到协议级 `404/405` 后自动尝试 Anthropic native 接口，并记住成功的协议。
+`auto` 会先尝试 OpenAI-compatible 接口；遇到协议级 `404/405` 后自动尝试备用协议，并记住成功的协议。
 
 ### 1.2 配置 API Key
 
 API Key 不要写入项目 `.env`、代码或命令历史。推荐保存在本地 Secret 文件：
 
 ```bash
-# /mnt/sda/huangwei/.env
-AUTORECON_LLM_API_KEY='your-key'
+AUTORECON_LLM_API_KEY='<your-key>'
 ```
 
 安全启动脚本会在当前 Dashboard 进程启动前执行 `source/export`，但不会复制或打印 Key：
 
 ```bash
-cd /mnt/sda/huangwei/projects/AutoRecon
-
-AUTORECON_SECRET_FILE=/mnt/sda/huangwei/.env \
+AUTORECON_SECRET_FILE=<path-to-secret-file> \
   scripts/run_agentic_dashboard.sh \
-  --host 127.0.0.1 \
-  --port 8901
+  --host <host> \
+  --port <port>
 ```
 
 打开：
 
 ```text
-http://127.0.0.1:8901
+http://<host>:<port>
 ```
 
 也可以手动导出后启动：
 
 ```bash
-export AUTORECON_LLM_API_KEY='your-key'
+export AUTORECON_LLM_API_KEY='<your-key>'
 
 python -m agentic.dashboard_server \
   --host 127.0.0.1 \
@@ -92,11 +90,11 @@ lsof -iTCP:8901 -sTCP:LISTEN
 
 ### 第二步：选择 Execution mode
 
-| 选项                         | 什么时候使用                            | 是否运行影像处理工具 |
-| ---------------------------- | --------------------------------------- | -------------------- |
-| `Run full pipeline`        | 从原始 BTFE NIfTI 开始新运行或断点继续  | 是                   |
-| `Import existing run demo` | 导入已完成的 run，查看可视化、QC 和报告 | 否                   |
-| `Plan only`                | 只让系统理解需求并生成计划              | 否                   |
+| 选项 | 什么时候使用 | 是否运行影像处理工具 |
+| --- | --- | --- |
+| `Run full pipeline` | 从原始 BTFE NIfTI 开始新运行或断点继续 | 是 |
+| `Import existing run demo` | 导入已完成的 run，查看可视化、QC 和报告 | 否 |
+| `Plan only` | 只让系统理解需求并生成计划 | 否 |
 
 ### 第三步：填写路径参数
 
@@ -157,10 +155,10 @@ Gestational age: 对应孕周
 
 ```text
 Execution mode: Run full pipeline
-Subject directory: /mnt/sda/public/00_Datasets/in_house/MRI/20260430-NJGL-fetal_brain/IngeniaAmbition_patch2/nii/AnHuiJing
-Work root: /mnt/sda/huangwei/projects/AutoRecon/AnHuiJing_raw_run01
+Subject directory: /path/to/deidentified_subject
+Work root: /path/to/output_runs/subject_001_raw_run01
 Gestational age: 31
-Atlas: /mnt/sda/public/00_Projects/2512_AutoRecon/data/FBA_Chinese_Atlas/img/31w.nii.gz
+Atlas: /path/to/atlas/31w.nii.gz
 ROI mode: skip
 Surface: off
 ```
@@ -168,7 +166,7 @@ Surface: off
 用户需求：
 
 ```text
-请对31周胎儿 AnHuiJing 从原始 BTFE NIfTI 输入开始，
+请对 31 周胎儿 subject_001 从原始 BTFE NIfTI 输入开始，
 重新运行 extraction、reconstruction、registration，
 不复用任何已有中间结果。展示这三个步骤的日志、产物、质量指标和可视化，
 分别生成分步说明，并生成一份包含全部执行步骤的完整中文最终报告。
@@ -187,7 +185,7 @@ report_steps = [extraction, reconstruction, registration]
 ### 示例 B：导入完整结果
 
 ```text
-导入 existing_run_dir=/mnt/sda/huangwei/projects/AutoRecon/AnHuiJing_run02，
+导入 existing_run_dir=/path/to/output_runs/subject_001_run02，
 展示完整六步可视化、每一步质量指标和日志，
 基于全部证据生成完整中文专业研究报告。
 ```
@@ -196,13 +194,13 @@ report_steps = [extraction, reconstruction, registration]
 
 ```text
 Execution mode: Import existing run demo
-Existing run directory: /mnt/sda/huangwei/projects/AutoRecon/AnHuiJing_run02
+Existing run directory: /path/to/output_runs/subject_001_run02
 ```
 
 ### 示例 C：页面只展示一步，但报告使用全部证据
 
 ```text
-导入 existing_run_dir=/mnt/sda/huangwei/projects/AutoRecon/BaiHuPing_run01，
+导入 existing_run_dir=/path/to/output_runs/subject_002_run01，
 只展示 reconstruction，但用全部可用证据生成完整中文报告，
 并明确列出需要复核的质量问题。
 ```
@@ -218,11 +216,11 @@ report_steps = []  # 空数组表示报告使用全部可用证据
 
 ## 4. 三种范围的区别
 
-| 字段                | 含义                       | 影响                           |
-| ------------------- | -------------------------- | ------------------------------ |
-| `execution_steps` | 实际计算哪些 Pipeline 步骤 | 计算资源、执行时间和依赖步骤   |
-| `display_steps`   | Dashboard 显示哪些步骤     | 只影响页面                     |
-| `report_steps`    | 报告引用哪些步骤的证据     | 只影响报告；空数组表示全部证据 |
+| 字段 | 含义 | 影响 |
+| --- | --- | --- |
+| `execution_steps` | 实际计算哪些 Pipeline 步骤 | 计算资源、执行时间和依赖步骤 |
+| `display_steps` | Dashboard 显示哪些步骤 | 只影响页面 |
+| `report_steps` | 报告引用哪些步骤的证据 | 只影响报告；空数组表示全部证据 |
 
 例如“只展示 reconstruction，但生成完整报告”并不矛盾：页面可以保持简洁，报告仍检查所有已有证据。
 
@@ -241,14 +239,14 @@ outputs/registered_input/<subject>.nii.gz
 
 Dashboard 中每一步至少显示两个技术质量指标：
 
-| 步骤           | 主要检查                                  |
-| -------------- | ----------------------------------------- |
-| Extraction     | 掩膜成功率、前景范围、切片覆盖            |
-| Reconstruction | 图像有限值、非零比例、强度范围、体素数    |
-| Registration   | Mattes、GC、配准图像是否存在              |
-| Tissue         | 标签数、前景范围、与配准 MRI 空间是否一致 |
-| ROI            | 标签数、前景范围、与配准 MRI 空间是否一致 |
-| Surface        | 必要表面文件和统计文件是否齐全            |
+| 步骤 | 主要检查 |
+| --- | --- |
+| Extraction | 掩膜成功率、前景范围、切片覆盖 |
+| Reconstruction | 图像有限值、非零比例、强度范围、体素数 |
+| Registration | Mattes、GC、配准图像是否存在 |
+| Tissue | 标签数、前景范围、与配准 MRI 空间是否一致 |
+| ROI | 标签数、前景范围、与配准 MRI 空间是否一致 |
+| Surface | 必要表面文件和统计文件是否齐全 |
 
 状态含义：
 
@@ -263,7 +261,7 @@ Dashboard 中每一步至少显示两个技术质量指标：
 不使用 LLM/Dashboard 编排时，可以直接运行：
 
 ```bash
-cd /mnt/sda/huangwei/projects/AutoRecon
+cd /path/to/project
 
 bash pipeline/run_single_case_pipeline.sh \
   --subject-dir /path/to/subject \
