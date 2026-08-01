@@ -1,10 +1,32 @@
-# 基于 Agent 的胎儿医学影像工具链
+# AutoRecon
+
+<p align="center">
+  <img src="assets/images/hero-fetal-brain-agent.png" alt="AutoRecon 胎儿脑 MRI Agent" width="100%">
+</p>
+
+<p align="center">
+  <strong>基于 Agent 的胎儿脑 MRI 全流程研究工具链</strong>
+</p>
+
+<p align="center">
+  脑提取 · 三维重建 · 图像配准 · 组织分割 · 脑区分区 · 表面生成
+</p>
 
 本胎儿 Agent 用于胎儿脑 MRI 的脑提取、三维重建、图像配准、组织分割、脑区分区、表面生成，以及基于证据的质量检查和研究报告生成。
 
 推荐通过 Agentic Dashboard 使用：用户直接输入自然语言需求，系统先整理需求并生成执行计划，用户确认后再运行工具。每一步都会显示进度、简短日志、可视化结果和技术质量指标。
 
 > 最终报告用于科研分析和专家复核，不是临床诊断报告。技术检查通过不代表医学正常。
+
+## 工作流程
+
+<p align="center">
+  <img src="assets/images/pipeline-overview.png" alt="AutoRecon 六阶段处理流程" width="100%">
+</p>
+
+```text
+自然语言需求 → 结构化需求 → 可确认计划 → Pipeline 执行 → Evidence Bank → 研究报告
+```
 
 ## 1. 快速启动 Dashboard
 
@@ -230,6 +252,54 @@ report_steps = []  # 空数组表示报告使用全部可用证据
 脑提取 → 三维重建 → 图像配准 → 组织分割 ┐
                               └→ 脑区分区 ┴→ 表面生成
 ```
+
+### 5.1 脑提取 Extraction
+
+从原始 BTFE MRI 切片中定位胎儿脑区域，生成逐切片脑掩膜和提取结果。主要检查掩膜成功率、前景范围与切片覆盖情况。
+
+<p align="center">
+  <img src="assets/images/pipeline-extraction-public.png" alt="胎儿脑 MRI 脑提取结果" width="100%">
+</p>
+
+### 5.2 三维重建 Reconstruction
+
+将多方向二维采集重建为高分辨率三维胎儿脑 MRI，检查有限值、非零比例、强度范围和有效体素数量。
+
+<p align="center">
+  <img src="assets/images/pipeline-reconstruction-public.png" alt="胎儿脑 MRI 三维重建结果" width="100%">
+</p>
+
+### 5.3 图像配准 Registration
+
+将个体重建结果与对应孕周图谱对齐，为组织分割、脑区分区和表面生成建立统一空间。主要检查 Mattes、GC 和配准结果完整性。
+
+<p align="center">
+  <img src="assets/images/pipeline-registration-public.png" alt="胎儿脑 MRI 图像配准结果" width="100%">
+</p>
+
+### 5.4 组织分割 Tissue Segmentation
+
+在配准后的 MRI 上生成组织标签，检查标签数量、前景覆盖以及标签与 MRI 的空间一致性。
+
+<p align="center">
+  <img src="assets/images/pipeline-tissue-public.png" alt="胎儿脑 MRI 组织分割结果" width="100%">
+</p>
+
+### 5.5 脑区分区 Regional Parcellation
+
+将孕周图谱中的脑区标签映射到个体空间，生成用于区域测量和后续统计分析的 ROI 结果。
+
+<p align="center">
+  <img src="assets/images/pipeline-roi-public.png" alt="胎儿脑 MRI 脑区分区结果" width="100%">
+</p>
+
+### 5.6 表面生成 Surface Generation
+
+结合重建 MRI、组织标签和脑区标签生成皮层表面、表面标签及区域统计文件。
+
+<p align="center">
+  <img src="assets/images/pipeline-surface-public.png" alt="胎儿脑 MRI 表面生成产物" width="72%">
+</p>
 
 Step 4、5、6 必须基于 Step 3 的配准结果：
 
