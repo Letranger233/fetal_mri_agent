@@ -1,4 +1,4 @@
-# AutoRecon
+# 基于 Agent 的胎儿脑 MRI 全流程研究工具链
 
 <p align="center">
   <img src="assets/images/hero-fetal-brain-agent.png" alt="AutoRecon 胎儿脑 MRI Agent" width="100%">
